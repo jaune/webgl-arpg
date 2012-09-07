@@ -1,0 +1,15 @@
+{
+  "author": "jaune",
+  "name": "rpg",
+  "description": "Roleplay game.",
+  "version": "0.0.0",
+  "dependencies": {
+    "express" : "*",
+    "socket.io" : "*"
+  },
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}

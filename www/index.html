@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="utf-8">
+		<title>rpg</title>
+		<link rel="stylesheet" href="styles/all.css" type="text/css" media="all">
+		
+
+		
+
+		<script type="text/javascript" src="scripts/Inputs.js"></script>
+
+		<script type="text/javascript" src="scripts/gl-matrix.js"></script>
+		<script type="text/javascript" src="scripts/Canvas.js"></script>
+		<script type="text/javascript" src="scripts/WebGL.js"></script>
+		<script type="text/javascript" src="scripts/Texture.js"></script>
+
+		<script type="text/javascript" src="scripts/Area.js"></script>
+		<script id="area-fs" type="x-shader/x-fragment">
+			#ifdef GL_ES
+				precision highp float;
+			#endif
+
+			uniform sampler2D uTilesetSampler;
+			uniform sampler2D uAreaSampler;
+
+			uniform float uTileSize;
+			uniform float uTilesetSize;
+			uniform float uAreaSize;
+
+			varying vec2 vTextureCoord;
+
+			void main(void) {
+				vec2 index = texture2D(uAreaSampler, vTextureCoord.st).xy * 256.0 * uTileSize;
+				gl_FragColor = texture2D(
+					uTilesetSampler, 
+					(mod((vTextureCoord.st * uAreaSize), uTileSize) + index) / uTilesetSize
+				);
+			}
+		</script>
+		<script id="area-vs" type="x-shader/x-vertex">
+			#ifdef GL_ES
+				precision highp float;
+			#endif
+
+			attribute vec2 aVertexPosition;
+			attribute vec2 aTextureCoord;
+			
+			uniform mat4 uViewportMatrix;
+
+			varying vec2 vTextureCoord;
+
+			void main(void) {
+				vTextureCoord = aTextureCoord;
+				gl_Position = uViewportMatrix * vec4(aVertexPosition, 0.0, 1.0);
+			}
+		</script>
+
+<!-- ***************************************** -->
+
+		<script type="text/javascript" src="scripts/Characters.js"></script>
+		<script id="characters-fs" type="x-shader/x-fragment">
+			#ifdef GL_ES
+				precision highp float;
+			#endif
+			uniform sampler2D uCharacterSampler;
+
+			varying vec2 vCoordinates;
+
+			void main(void) {
+				gl_FragColor = texture2D(
+					uCharacterSampler, 
+					vCoordinates.st
+				);
+				// gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+			}
+		</script>
+
+		<script id="characters-vs" type="x-shader/x-vertex">
+			#ifdef GL_ES
+				precision highp float;
+			#endif
+
+			attribute vec2 aPosition;
+			attribute vec2 aCoordinates;
+
+			uniform mat4 uViewportMatrix;
+
+			varying vec2 vCoordinates;
+
+			void main(void) {
+				vCoordinates = aCoordinates;
+				gl_Position = uViewportMatrix * vec4(aPosition, 0.0, 1.0);
+			}
+		</script>
+
+		
+
+<!--		<script src="/socket.io/socket.io.js"></script> -->
+	</head>
+	<body>
+
+		
+		<script type="text/javascript" src="scripts/main.js"></script>
+	</body>
+</html>

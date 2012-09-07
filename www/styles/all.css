@@ -1,0 +1,17 @@
+html, body {
+	padding: 0;
+	margin: 0;
+	background: #F0F;
+	
+	color: #fff;
+	font: bolder 12px monospace;
+	
+	overflow: hidden;
+	
+}
+canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: #000;
+}
