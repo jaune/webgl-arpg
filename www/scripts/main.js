@@ -1,6 +1,6 @@
 var	current_time = 0,
 	elapsed_time = 0,
-	last_time = 0,
+	last_time = null,
 	viewport_width = 0,
 	viewport_height = 0,
 	viewport_matrix = null,
@@ -31,9 +31,15 @@ function viewport_apply(program) {
 
 webgl.onrender = function (time) {
 	// console.time('render');
-
 	current_time = time;
-	elapsed_time = current_time - last_time;
+	if (last_time === null) {
+		elapsed_time =  0;
+	} else {
+		elapsed_time =  current_time - last_time;
+	}
+	last_time = current_time;
+
+	characters.update(elapsed_time);
 	
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -80,10 +86,11 @@ webgl.oninitialize = function (width, height) {
 
 	area.initialize();
 	characters.initialize();
+	
+	player_character = new Character();
+	characters.characters_.push(player_character);
 
 	inputs.initialize();
-
-	player_character = characters.create(0.0, 0.0);
 };
 
 inputs.mapping({
@@ -117,13 +124,33 @@ inputs.mapping({
 inputs.onaction = function (action) {
 	switch (action) {
 		case 'walk south':
+			player_character.next_action_ = {
+				delta: vec2.create([0.0, 1.0]),
+				duration: 300
+			};
 		break;
-		case 'walk south':
+		case 'walk north':
+			player_character.next_action_ = {
+				delta: vec2.create([0.0, -1.0]),
+				duration: 300
+			};
+		break;
+		case 'walk east':
+			player_character.next_action_ = {
+				delta: vec2.create([1.0, 0.0]),
+				duration: 300
+			};
+		break;
+		case 'walk west':
+			player_character.next_action_ = {
+				delta: vec2.create([-1.0, 0.0]),
+				duration: 300
+			};
 		break;
 		default:
+			player_character.next_action_ = null;
 
 	}
-	console.debug(action);
 };
 
 function image_load(uri, callback) {

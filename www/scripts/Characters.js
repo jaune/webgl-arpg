@@ -22,28 +22,20 @@ var Characters = function (characters_image) {
 };
 
 
-Characters.prototype.create = function (x, y) {
-	var index = this.characters_.length;
-	this.characters_.push({
-		x : x,
-		y : y
-	});
-	return index;
-};
-
-Characters.prototype.set = function (index, x, y) {
-	this.characters_[index] = {
-		x : x,
-		y : y
-	};
-};
-
 Characters.prototype.initialize = function () {
 	this.program_ = webgl.createProgramFromIds('characters-fs', 'characters-vs');
 
 	this.texture_.initializeFromImage(this.program_, 'uCharacterSampler', this.image_);
 
 	this.initializeAttributes();
+};
+
+Characters.prototype.update = function (elapsed_time) {
+	var c = this.characters_,
+		l = c.length;
+	for (i = 0; i < l; i++) {
+		c[i].update(elapsed_time);
+	}
 };
 
 Characters.prototype.render = function (callback) {
@@ -72,8 +64,8 @@ Characters.prototype.buildAttributes = function () {
 		data = new Float32Array(l * s);
 
 	for (i = 0; i < l; i++) {
-		x = (c[i].x * 32) + o;
-		y = (c[i].y * 32) + o;
+		x = (c[i].position_current_[0] * 32) + o;
+		y = (c[i].position_current_[1] * 32) + o;
 		data.set([
 			x + o, y + o, t, t,
 			x - o, y + o, 0.0, t,

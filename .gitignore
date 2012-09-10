@@ -167,3 +167,7 @@ npm-debug.log
 
 #node modules
 node_modules
+
+# sublimetext project files
+*.sublime-project
+*.sublime-workspace
