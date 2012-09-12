@@ -1,33 +1,74 @@
+
 var modules = {
 	express: require('express'),
 	http: require('http'),
-	'socket.io': require('socket.io')
+	socket_io: require('socket.io')
 };
+
+var Entities = require('./common/Entities.js');
+var CharacterFactory = require('./common/CharacterFactory.js');
+
+
+var express_static = modules.express['static'];
 
 var app = modules.express(),
 	server = modules.http.createServer(app),
-	io = modules['socket.io'].listen(server)
-	;
+	io = modules.socket_io.listen(server),
+	entities = new Entities();
 
-app.use(modules.express['static']('www'));
+entities.register('Character', new CharacterFactory());
 
-io.sockets.on('connection', function (socket) {
+app.use(express_static('www'));
+app.use('/scripts/client', express_static('./client'));
+app.use('/scripts/common', express_static('./common'));
 
-	socket.emit('player initialize', {
-		position: { x: 0, y: 0 },
-		direction: 'south'
+
+function onConnection (socket) {
+
+	socket.on('area enter', function (data) {
+
+		var character = entities.create('Character');
+		var uuid = entities.identify(character);
+
+		socket.on('disconnect', function () {
+			// socket.broadcast.emit('other leave', uuid, character.serialize());
+		});
+
+		socket.emit('area enter', {
+			sent_at : Date.now(),
+			character : uuid,
+			entities : entities.serialize()
+		});
+
+		socket.broadcast.emit('entities update', {
+			sent_at : Date.now(),
+			entities : entities.serialize(uuid)
+		});
+	
+
+		socket.on('owner do', function (data) {
+			var action = {
+				character: character.serialize(),
+				sent_at : data.sent_at,
+				received_at : Date.now(),
+				action: data.action
+			};
+			socket.broadcast.emit('other do', action);
+		});
+
 	});
-  
-  socket.on('player do', function (data) {
-		var action = {
-			player : '',
-			sent_at : data.date,
-			received_at : Date.now(),
-			action: data.action
-		};
-  });
+}
 
-});
+
+io.sockets.on('connection', onConnection);
+
+
+setInterval(function () {
+	io.sockets.emit('entities update', {
+		sent_at : Date.now(),
+		entities : entities.serialize()
+	});
+}, 1000);
 
 
 server.listen(80);

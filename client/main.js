@@ -8,8 +8,10 @@ var	current_time = 0,
 	viewport_offset_y = 200,
 	area = null,
 	characters = null,
+	fog = null,
 	inputs = new Inputs(),
-	player_character = null;
+	player_character = null,
+	network = new Network();
 
 function viewport_matrix_update() {
 	var matrix = mat4.create([
@@ -22,12 +24,13 @@ function viewport_matrix_update() {
 	mat4.scale(matrix, [0.5, 0.5, 0]);
 	return matrix;
 }
-
+/*
 function viewport_apply(program) {
 	var uniform = webgl.locatesUniform(program, 'uViewportMatrix');
 	gl.viewport(0, 0, viewport_width, viewport_height);
 	gl.uniformMatrix4fv(uniform, false, viewport_matrix);
 }
+*/
 
 webgl.onrender = function (time) {
 	// console.time('render');
@@ -42,22 +45,27 @@ webgl.onrender = function (time) {
 	characters.update(elapsed_time);
 	
 	gl.clear(gl.COLOR_BUFFER_BIT);
+//	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
 	if (need_viewport_apply === true) {
 		viewport_matrix = viewport_matrix_update();
+
+		area.applyViewportMatrix(viewport_matrix);
+		characters.applyViewportMatrix(viewport_matrix);
 	}
 
-	area.render(function (program) {
-		if (need_viewport_apply === true) {
-			viewport_apply(program);
-		}
-	});
+	area.render();
+	characters.render();
 
-	characters.render(function (program) {
+/*
+	gl.blendFunc(gl.ZERO, gl.SRC_COLOR);
+
+	fog.render(function (program) {
 		if (need_viewport_apply === true) {
 			viewport_apply(program);
 		}
 	});
+*/
 
 	need_viewport_apply = false;
 
@@ -86,11 +94,43 @@ webgl.oninitialize = function (width, height) {
 
 	area.initialize();
 	characters.initialize();
+//	fog.initialize();
 	
-	player_character = new Character();
-	characters.characters_.push(player_character);
+	network.initialize();
 
+
+};
+
+network.onCreateEntity = function (type, entity) {
+	switch (type) {
+		case 'Character':
+			characters.append(entity);
+		break;
+		case '':
+		break;
+		default:
+	}
+};
+
+network.onAreaEnter = function (character) {
+	player_character = character;
+	characters.append(character);
 	inputs.initialize();
+};
+
+network.onOtherDo = function (action) {
+//	console.debug(action);
+};
+
+network.onOtherEnter = function (character) {
+	characters.append(character);
+};
+
+network.onOtherLeave = function (player) {
+	console.debug('other leave');
+};
+
+network.onAreaTick = function (area) {
 };
 
 inputs.mapping({
@@ -122,6 +162,7 @@ inputs.mapping({
 });
 
 inputs.onaction = function (action) {
+	network.doAction(action);
 	switch (action) {
 		case 'walk south':
 			player_character.next_action_ = {
@@ -163,10 +204,13 @@ function image_load(uri, callback) {
 
 (function main () {
 	image_load('images/tileset0.png', function (tileset_image) {
-		image_load('images/characters0.png', function (characters_image) {
-			area = new Area(tileset_image);
-			characters = new Characters(characters_image);
-			webgl.initialize();
+		image_load('images/characters.png', function (characters_image) {
+			image_load('images/fog0.png', function (fog_image) {
+				area = new AreaRenderer(tileset_image);
+				characters = new CharactersRenderer(characters_image);
+				// fog = new Fog(fog_image);
+				webgl.initialize();
+			});
 		});
 	});
 })();

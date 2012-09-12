@@ -3,11 +3,7 @@ var Texture = function () {
 	this.uniform_ = null;
 };
 
-Texture.prototype.initializeFromImage = function (program, uniform_name, image) {
-	var uniform = gl.getUniformLocation(program, uniform_name);
-	if (uniform === null) {
-		throw new Error('Missing uniform `'+uniform_name+'` location.');
-	}
+Texture.prototype.initializeFromImage = function (uniform, image) {
 	this.uniform_ = uniform;
 
 	var texture = gl.createTexture();
@@ -23,11 +19,7 @@ Texture.prototype.initializeFromImage = function (program, uniform_name, image) 
 };
 
 
-Texture.prototype.initializeFromBuffer = function (program, uniform_name, buffer, width, height) {
-	var uniform = gl.getUniformLocation(program, uniform_name);
-	if (uniform === null) {
-		throw new Error('Missing uniform `'+uniform_name+'` location.');
-	}
+Texture.prototype.initializeFromBuffer = function (uniform, buffer, width, height) {
 	this.uniform_ = uniform;
 
 	var texture = gl.createTexture();

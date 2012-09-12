@@ -4,18 +4,28 @@
 		<meta charset="utf-8">
 		<title>rpg</title>
 		<link rel="stylesheet" href="styles/all.css" type="text/css" media="all">
-		
+
+		<script type="text/javascript">
+			var __BROWSER__ = true;
+		</script>
+		<script src="/socket.io/socket.io.js"></script>
+
+		<script type="text/javascript" src="scripts/common/gl-matrix.js"></script>
+		<script type="text/javascript" src="scripts/common/CharacterFactory.js"></script>
+		<script type="text/javascript" src="scripts/common/Character.js"></script>
+		<script type="text/javascript" src="scripts/common/Entities.js"></script>
+
+		<script type="text/javascript" src="scripts/client/Network.js"></script>
+		<script type="text/javascript" src="scripts/client/Inputs.js"></script>
+		<script type="text/javascript" src="scripts/client/Canvas.js"></script>
+		<script type="text/javascript" src="scripts/client/Program.js"></script>
+		<script type="text/javascript" src="scripts/client/WebGL.js"></script>
+		<script type="text/javascript" src="scripts/client/Texture.js"></script>
+
+		<script type="text/javascript" src="scripts/client/AreaRenderer.js"></script>
+		<script type="text/javascript" src="scripts/client/CharactersRenderer.js"></script>
 
 
-		<script type="text/javascript" src="scripts/Inputs.js"></script>
-
-		<script type="text/javascript" src="scripts/gl-matrix.js"></script>
-		<script type="text/javascript" src="scripts/Canvas.js"></script>
-		<script type="text/javascript" src="scripts/WebGL.js"></script>
-		<script type="text/javascript" src="scripts/Texture.js"></script>
-
-
-		<script type="text/javascript" src="scripts/Area.js"></script>
 		<script id="area-fs" type="x-shader/x-fragment">
 			#ifdef GL_ES
 				precision highp float;
@@ -58,8 +68,8 @@
 
 <!-- ***************************************** -->
 
-		<script type="text/javascript" src="scripts/Character.js"></script>
-		<script type="text/javascript" src="scripts/Characters.js"></script>
+		
+		
 		<script id="characters-fs" type="x-shader/x-fragment">
 			#ifdef GL_ES
 				precision highp float;
@@ -95,13 +105,49 @@
 			}
 		</script>
 
-		
+<!-- ***************************************** 
 
+		<script type="text/javascript" src="scripts/Fog.js"></script>
+		<script id="fog-fs" type="x-shader/x-fragment">
+			#ifdef GL_ES
+				precision highp float;
+			#endif
+			uniform sampler2D uSampler;
+
+			varying vec2 vCoordinates;
+
+			void main(void) {
+				gl_FragColor = texture2D(
+					uSampler, 
+					vCoordinates.st
+				);
+				// gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+			}
+		</script>
+
+		<script id="fog-vs" type="x-shader/x-vertex">
+			#ifdef GL_ES
+				precision highp float;
+			#endif
+
+			attribute vec2 aPosition;
+			attribute vec2 aCoordinates;
+
+			uniform mat4 uViewportMatrix;
+
+			varying vec2 vCoordinates;
+
+			void main(void) {
+				vCoordinates = aCoordinates;
+				gl_Position = uViewportMatrix * vec4(aPosition, 0.0, 1.0);
+			}
+		</script>
+-->
 <!--		<script src="/socket.io/socket.io.js"></script> -->
 	</head>
 	<body>
 
 		
-		<script type="text/javascript" src="scripts/main.js"></script>
+		<script type="text/javascript" src="scripts/client/main.js"></script>
 	</body>
 </html>

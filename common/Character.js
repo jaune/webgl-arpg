@@ -1,18 +1,38 @@
-var Character = function () {
+var __BROWSER__ = __BROWSER__ || false;
+
+if (!__BROWSER__) {
+	require('./gl-matrix.js');
+}
+
+var Character = function (uuid) {
 	this.position_ = vec2.create([0.0, 0.0]);
 	this.position_current_ = this.position_;
 	
 	this.elapsed_time_ = 0;
 
-	this.next_action_ = null;
-	
 	this.action_ = null;
+	this.next_action_ = null;
+
+	this.uuid_ = uuid || null;
 
 	/*{
 		delta: vec2.create([0.0, 1.0]),
 		duration: 500
 	};*/
 };
+
+
+Character.prototype.unserialize = function (serial) {
+	this.position_ = vec2.create(serial.position);
+	this.position_current_ = this.position_;
+};
+
+Character.prototype.serialize = function () {
+	return {
+		position : [this.position_[0], this.position_[1]]
+	};
+};
+
 
 Character.prototype.computeCurrentPosition = function (scalar) {
 	var position = vec2.create();
@@ -45,3 +65,7 @@ Character.prototype.update = function (elapsed_time) {
 		this.action_ = this.next_action_;
 	}
 };
+
+if (!__BROWSER__) {
+	module.exports = Character;
+}

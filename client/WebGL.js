@@ -79,7 +79,7 @@ WebGL.prototype.createProgramFromIds = function (fs_id, vs_id) {
 	if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
 		throw new Error("Unable to initialize the shader program.");
 	}
-	return program;
+	return new Program(program);
 };
 
 WebGL.prototype.locatesAttribute = function (program, name) {
