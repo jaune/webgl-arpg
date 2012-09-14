@@ -1,23 +1,9 @@
 var Network = function () {
 	this.socket_ = null;
-	this.entities_ = new Entities();
+	this.machine_ = new Machine();
+	this.player_uuid_ = null;
 
-	this.entities_.register('Character', new CharacterFactory());
-
-	var self  = this;
-	this.entities_.onCreateEntity = function (type, entity) {
-		self.onCreateEntity(type, entity);
-	};
-
-	this.onConnect = function () {};
-	this.onDisconnect = function () {};
-
-	this.onAreaEnter = function () {};
-	this.onAreaTick = function () {};
-
-	this.onOtherDo = function () {};
-
-	this.onCreateEntity = function () {};
+	this.onEnter = function () {};
 };
 
 Network.prototype.initialize = function () {
@@ -27,33 +13,24 @@ Network.prototype.initialize = function () {
 	var self = this;
 
 	socket.on('connect', function () {
-		self.onConnect();
-		socket.emit('area enter', {
-			id : this.id_
-		});
+		socket.emit('enter');
 	});
 
-	socket.on('disconnect', function () {
-		self.onDisconnect();
+	socket.on('enter', function (player_uuid, machine) {
+		self.machine_.unserialize(machine);
+		
+		this.player_uuid_ = player_uuid;
+
+		var player = self.machine_.find(player_uuid);
+
+		self.onEnter(player);
 	});
 
-	socket.on('area enter', function (data) {
-		self.entities_.unserialize(data.entities);
-		self.onAreaEnter(self.entities_.find(data.character));
-	});
-
-	socket.on('entities update', function (data) {
-		self.entities_.unserialize(data.entities);
-	});
-
-	socket.on('other do', function (data) {
-		self.onOtherDo(data);
+	socket.on('machine', function (machine) {
+		self.machine_.unserialize(machine);
 	});
 };
 
 Network.prototype.doAction = function (action) {
-	socket.emit('owner do', {
-		action : action,
-		sent_at : Date.now()
-	});
+	socket.emit('actions', [action]);
 };

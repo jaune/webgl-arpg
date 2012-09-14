@@ -42,14 +42,14 @@ webgl.onrender = function (time) {
 	}
 	last_time = current_time;
 
-	characters.update(elapsed_time);
+	// characters.update(elapsed_time);
 	
 	gl.clear(gl.COLOR_BUFFER_BIT);
 //	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
 	if (need_viewport_apply === true) {
+		gl.viewport(0, 0, viewport_width, viewport_height);
 		viewport_matrix = viewport_matrix_update();
-
 		area.applyViewportMatrix(viewport_matrix);
 		characters.applyViewportMatrix(viewport_matrix);
 	}
@@ -73,9 +73,10 @@ webgl.onrender = function (time) {
 };
 
 webgl.onresize = function (width, height) {
-	need_viewport_apply = true;
 	viewport_width = width;
 	viewport_height = height;
+	
+	need_viewport_apply = true;
 };
 
 webgl.oninitialize = function (width, height) {
@@ -101,6 +102,7 @@ webgl.oninitialize = function (width, height) {
 
 };
 
+/*
 network.onCreateEntity = function (type, entity) {
 	switch (type) {
 		case 'Character':
@@ -111,26 +113,12 @@ network.onCreateEntity = function (type, entity) {
 		default:
 	}
 };
+*/
 
-network.onAreaEnter = function (character) {
-	player_character = character;
-	characters.append(character);
+network.onEnter = function (player) {
+	player_character = player.getCharacter();
+	characters.append(player_character);
 	inputs.initialize();
-};
-
-network.onOtherDo = function (action) {
-//	console.debug(action);
-};
-
-network.onOtherEnter = function (character) {
-	characters.append(character);
-};
-
-network.onOtherLeave = function (player) {
-	console.debug('other leave');
-};
-
-network.onAreaTick = function (area) {
 };
 
 inputs.mapping({
@@ -163,6 +151,7 @@ inputs.mapping({
 
 inputs.onaction = function (action) {
 	network.doAction(action);
+	/*
 	switch (action) {
 		case 'walk south':
 			player_character.next_action_ = {
@@ -192,6 +181,7 @@ inputs.onaction = function (action) {
 			player_character.next_action_ = null;
 
 	}
+	*/
 };
 
 function image_load(uri, callback) {

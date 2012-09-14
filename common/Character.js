@@ -4,7 +4,7 @@ if (!__BROWSER__) {
 	require('./gl-matrix.js');
 }
 
-var Character = function (uuid) {
+var Character = function () {
 	this.position_ = vec2.create([0.0, 0.0]);
 	this.position_current_ = this.position_;
 	
@@ -13,7 +13,6 @@ var Character = function (uuid) {
 	this.action_ = null;
 	this.next_action_ = null;
 
-	this.uuid_ = uuid || null;
 
 	/*{
 		delta: vec2.create([0.0, 1.0]),

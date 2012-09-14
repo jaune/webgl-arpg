@@ -54,6 +54,7 @@ CharactersRenderer.prototype.initialize = function () {
 	this.initializeAttributes();
 };
 
+/*
 CharactersRenderer.prototype.update = function (elapsed_time) {
 	var c = this.characters_,
 		l = c.length;
@@ -61,6 +62,7 @@ CharactersRenderer.prototype.update = function (elapsed_time) {
 		c[i].update(elapsed_time);
 	}
 };
+*/
 
 CharactersRenderer.prototype.applyViewportMatrix = function (matrix) {
 	this.viewport_matrix_ = matrix;

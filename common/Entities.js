@@ -7,8 +7,8 @@ var Entities = function () {
 	this.mappings_ = {};
 	this.uuids_ = [];
 
-	this.onUnserializeEntity = function () {};
-	this.onCreateEntity = function () {};
+	// this.onUnserializeEntity = function () {};
+	// this.onCreateEntity = function () {};
 };
 
 Entities.prototype.create = function (type, uuid) {
@@ -18,10 +18,8 @@ Entities.prototype.create = function (type, uuid) {
 
 	var index = this.entities_.length;
 	uuid = uuid || [
-		type,
-		Date.now().toString(36),
-		(index + 42).toString(36),
-		Math.round(Math.random() * 42).toString(36)
+		(index + 1).toString(36),
+		type
 	].join('-');
 
 	var entity = this.factories_[type].create(uuid);
@@ -30,8 +28,12 @@ Entities.prototype.create = function (type, uuid) {
 	this.entities_.push(entity);
 	this.mappings_[uuid] = index;
 
-	this.onCreateEntity(type, entity);
+//	this.onCreateEntity(type, entity);
 	return entity;
+};
+
+Entities.prototype.parseType = function (uuid) {
+	return uuid.split('-')[1];
 };
 
 Entities.prototype.register = function (type, factory) {
@@ -68,14 +70,14 @@ Entities.prototype.serializeAll = function () {
 		serial = {};
 
 	for (i = 0; i < l; ++i) {
-		serial[u[i]] = e[i].serialize();
+		serial[u[i]] = e[i].serialize(this);
 	}
 	return serial;
 };
 
 Entities.prototype.serializeOnce = function (uuid) {
 	var serial = {};
-	serial[uuid] = this.find(uuid).serialize();
+	serial[uuid] = this.find(uuid).serialize(this);
 	return serial;
 };
 
@@ -86,14 +88,14 @@ Entities.prototype.unserialize = function (serial) {
 
 	for (uuid in serial) {
 		if (serial.hasOwnProperty(uuid)) {
-			type = uuid.split('-')[0];
+			type = this.parseType(uuid);
 			if (!this.has(uuid)) {
 				entity = this.create(type, uuid);
 			} else {
 				entity = this.find(uuid);
 			}
-			entity.unserialize(serial[uuid]);
-			this.onUnserializeEntity(type, entity);
+			entity.unserialize(serial[uuid], this);
+			// this.onUnserializeEntity(type, entity);
 		}
 	}
 	return serial;

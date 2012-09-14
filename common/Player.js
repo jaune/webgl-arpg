@@ -1,23 +1,24 @@
 var __BROWSER__ = __BROWSER__ || false;
 
 if (!__BROWSER__) {
-	var Character = require('./Character.js');
 }
 
-var Player = function (uuid) {
-	this.character_ = new Character();
-	this.uuid_ = uuid || null;
+var Player = function () {
+	this.character_ = null;
 };
 
-Player.prototype.unserialize = function (data) {
-	this.uuid_ =	data.uuid;
-	this.character_.unserialize(data.character);
+
+Player.prototype.getCharacter = function () {
+	return this.character_;
 };
 
-Player.prototype.serialize = function () {
+Player.prototype.unserialize = function (serial, entities) {
+	this.character_ = entities.find(serial.character);
+};
+
+Player.prototype.serialize = function (entities) {
 	return {
-		uuid : this.uuid_,
-		character : this.character_.serialize()
+		character: entities.identify(this.character_)
 	};
 };
 
