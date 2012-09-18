@@ -23,6 +23,13 @@ var CharactersRenderer = function (characters_image) {
 };
 
 
+
+
+
+CharactersRenderer.prototype.contains = function (character) {
+	return this.characters_.indexOf(character) > 0;
+};
+
 CharactersRenderer.prototype.append = function (character) {
 	this.characters_.push(character);
 };
@@ -97,8 +104,9 @@ CharactersRenderer.prototype.buildAttributes = function () {
 		data = new Float32Array(l * s);
 
 	for (i = 0; i < l; i++) {
-		x = (c[i].position_current_[0] * 32) + o;
-		y = (c[i].position_current_[1] * 32) + o;
+		cp = c[i].computeCurrentPosition();
+		x = (cp[0] * 32) + o;
+		y = (cp[1] * 32) + o;
 
 		data.set([
 			x + o, y + o, t, t,

@@ -5,25 +5,36 @@ if (!__BROWSER__) {
 }
 
 var Character = function () {
-	this.position_ = vec2.create([0.0, 0.0]);
-	this.position_current_ = this.position_;
+	this.position_ = [0, 0];
 	
-	this.elapsed_time_ = 0;
+	// this.position_current_ = this.position_;
 
-	this.action_ = null;
 	this.next_action_ = null;
 
+	this.action_ = null;
+	this.duration_ = -1;
+	this.elapsed_cycle_ = 0;
+	this.delta_ = null;
 
-	/*{
-		delta: vec2.create([0.0, 1.0]),
-		duration: 500
-	};*/
+	this.initializeAction(Character.ACTION_DEFAULT);
 };
+
+Character.ACTION_WALK_NORTH = 'walk north';
+Character.ACTION_WALK_SOUTH = 'walk south';
+Character.ACTION_WALK_WEST = 'walk west';
+Character.ACTION_WALK_EAST = 'walk east';
+
+Character.ACTION_IDLE_NORTH = 'idle north';
+Character.ACTION_IDLE_SOUTH = 'idle south';
+Character.ACTION_IDLE_WEST = 'idle west';
+Character.ACTION_IDLE_EAST = 'idle east';
+
+Character.ACTION_DEFAULT = Character.ACTION_IDLE_SOUTH;
 
 
 Character.prototype.unserialize = function (serial) {
-	this.position_ = vec2.create(serial.position);
-	this.position_current_ = this.position_;
+	this.position_ = serial.position;
+//	this.position_current_ = this.position_;
 };
 
 Character.prototype.serialize = function () {
@@ -33,35 +44,83 @@ Character.prototype.serialize = function () {
 };
 
 
-Character.prototype.computeCurrentPosition = function (scalar) {
+Character.prototype.computeCurrentPosition = function () {
 	var position = vec2.create();
-	vec2.scale(this.action_.delta, scalar, position);
+	if (this.duration_ !== -1) {
+		vec2.scale(this.delta_, this.elapsed_cycle_ / this.duration_, position);
+	}
 	vec2.add(this.position_, position);
+	vec2.scale(position, 0.001);
 	return position;
 };
 
-Character.prototype.update = function (elapsed_time) {
-	if (this.action_ !== null ) {
-		this.elapsed_time_ += elapsed_time;
-		if (this.elapsed_time_ > this.action_.duration) {
-			
-			this.position_current_ = this.position_ = this.computeCurrentPosition(1.0);
+Character.prototype.setNextAction = function (action) {
+	this.next_action_ = action;
+};
 
-			this.elapsed_time_ -= this.action_.duration;
-			this.action_ = this.next_action_;
-			if (this.action_) {
-				this.update(0);
-			} else {
-				this.elapsed_time_ = 0;
-			}
-			return;
+
+Character.prototype.initializeAction = function (action) {
+	this.action_ = action;
+	this.elapsed_cycle_ = 0;
+	switch (this.action_) {
+		case Character.ACTION_WALK_SOUTH:
+			this.duration_ = 10;
+			this.delta_ = [0, 1000];
+		break;
+		case Character.ACTION_WALK_NORTH:
+			this.duration_ = 10;
+			this.delta_ = [0, -1000];
+		break;
+		case Character.ACTION_WALK_WEST:
+			this.duration_ = 10;
+			this.delta_ = [-1000, 0];
+		break;
+		case Character.ACTION_WALK_EAST:
+			this.duration_ = 10;
+			this.delta_ = [1000, 0];
+		break;
+		case Character.ACTION_IDLE_SOUTH:
+		case Character.ACTION_IDLE_NORTH:
+		case Character.ACTION_IDLE_WEST:
+		case Character.ACTION_IDLE_EAST:
+			this.duration_ = -1;
+			this.delta_ = null;
+		break;
+	}
+};
+
+Character.prototype.releaseAction = function () {
+	switch (this.action_) {
+		case Character.ACTION_WALK_SOUTH:
+		case Character.ACTION_WALK_NORTH:
+		case Character.ACTION_WALK_WEST:
+		case Character.ACTION_WALK_EAST:
+			this.position_ = [
+				this.position_[0] + this.delta_[0],
+				this.position_[1] + this.delta_[1]
+			];
+		break;
+	}
+};
+
+Character.prototype.updateAction = function () {
+	if ((this.duration_ !== -1) && (this.elapsed_cycle_ >= this.duration_)) {
+		this.releaseAction();
+		if (this.next_action_ !== null) {
+			this.initializeAction(this.next_action_);
+		} else {
+			this.initializeAction(this.ACTION_DEFAULT);
 		}
-
-		this.position_current_ = this.computeCurrentPosition(this.elapsed_time_ / this.action_.duration);
 		return;
-	} else if (this.next_action_ !== null) {
-		this.elapsed_time_ = 0;
-		this.action_ = this.next_action_;
+	}
+	this.elapsed_cycle_++;
+};
+
+Character.prototype.step = function () {
+	if ((this.duration_ === -1) && (this.next_action_ !== null)) {
+		this.initializeAction(this.next_action_);
+	} else {
+		this.updateAction();
 	}
 };
 

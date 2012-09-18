@@ -114,10 +114,18 @@ network.onCreateEntity = function (type, entity) {
 	}
 };
 */
+network.onCreateEntity = function (entity, type, uuid) {
+	if (type == Machine.ENTITY_CHARACTER) {
+		characters.append(entity);
+	}
+};
+
+network.onUpdateEntity = function (entity, type, uuid) {
+};
 
 network.onEnter = function (player) {
 	player_character = player.getCharacter();
-	characters.append(player_character);
+//	characters.append(player_character);
 	inputs.initialize();
 };
 
@@ -150,7 +158,12 @@ inputs.mapping({
 });
 
 inputs.onaction = function (action) {
-	network.doAction(action);
+	
+	if (action === 'attack') {
+		console.debug(network);
+	} else {
+		network.pushOrder(action);
+	}
 	/*
 	switch (action) {
 		case 'walk south':

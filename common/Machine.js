@@ -9,14 +9,25 @@ if (!__BROWSER__) {
 var Machine = function () {
 	this.entities_ = new Entities();
 	this.cycle_ = 0;
-	this.actions_ = [];
 
 	this.registerFactories();
+
+	var self = this;
+	this.entities_.onCreateEntity = function (entity, type, uuid) {
+		self.onCreateEntity(entity, type, uuid);
+	};
+
+	this.entities_.onUpdateEntity = function (entity, type, uuid) {
+		self.onUpdateEntity(entity, type, uuid);
+	};
 };
 
+Machine.ENTITY_PLAYER = 'Player';
+Machine.ENTITY_CHARACTER = 'Character';
+
 Machine.prototype.registerFactories = function () {
-	this.entities_.register('Character', new CharacterFactory());
-	this.entities_.register('Player', new PlayerFactory());
+	this.entities_.register(Machine.ENTITY_CHARACTER, new CharacterFactory());
+	this.entities_.register(Machine.ENTITY_PLAYER, new PlayerFactory());
 };
 
 
@@ -25,29 +36,31 @@ Machine.prototype.find = function (uuid) {
 };
 
 Machine.prototype.enter = function () {
-	var character = this.entities_.create('Character');
-	var player = this.entities_.create('Player');
+	var character = this.entities_.create(Machine.ENTITY_CHARACTER);
+	var player = this.entities_.create(Machine.ENTITY_PLAYER);
 	player.character_ = character;
 	return this.entities_.identify(player);
 };
 
-Machine.prototype.pushAction = function (entity, action) {
-
-	console.log(entity+' : '+action);
-
-	this.actions_.push({
-		entity : entity,
-		action : action
-	});
-	
+Machine.prototype.pushOrder = function (uuid, order) {
+	console.log(uuid +': '+ order);
+	var player = this.find(uuid);
+	player.pushOrder(this.cycle_, order);
 };
 
 Machine.prototype.step = function () {
-	var a = this.actions_;
-	for (i = 0, l = a.length; i < l; ++i) {
-		// a[i];
+	var c = this.entities_.findByType(Machine.ENTITY_CHARACTER),
+		p = this.entities_.findByType(Machine.ENTITY_PLAYER),
+		l = 0,
+		i = 0;
+
+	for (i = 0, l = p.length; i < l; ++i) {
+		p[i].step();
 	}
-	this.actions_ = [];
+	
+	for (i = 0, l = c.length; i < l; ++i) {
+		c[i].step();
+	}
 	this.cycle_++;
 };
 

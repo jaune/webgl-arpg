@@ -3,8 +3,20 @@ var Network = function () {
 	this.machine_ = new Machine();
 	this.player_uuid_ = null;
 
-	this.onEnter = function () {};
+	var self = this;
+	this.machine_.onCreateEntity = function (entity, type, uuid) {
+		self.onCreateEntity(entity, type, uuid);
+	};
+
+	this.machine_.onUpdateEntity = function (entity, type, uuid) {
+		self.onUpdateEntity(entity, type, uuid);
+	};
 };
+
+Network.prototype.onCreateEntity = function () {};
+Network.prototype.onUpdateEntity = function () {};
+
+Network.prototype.onEnter = function () {};
 
 Network.prototype.initialize = function () {
 
@@ -31,6 +43,6 @@ Network.prototype.initialize = function () {
 	});
 };
 
-Network.prototype.doAction = function (action) {
-	socket.emit('actions', [action]);
+Network.prototype.pushOrder = function (order) {
+	socket.emit('order', order);
 };

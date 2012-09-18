@@ -57,15 +57,17 @@ function onConnection (socket) {
 			socket.emit('enter', player_uuid, machine.serialize());
 		});
 
-		socket.on('actions', function (actions) {
+		socket.on('order', function (order) {
 			if (!player_uuid) {
 				return;
 			}
+			machine.pushOrder(player_uuid, order);
+			/*
 			var a = actions;
 			for (i = 0, l = a.length; i < l; i++) {
 				machine.pushAction(player_uuid, a[i]);
 			}
-			
+			*/
 /*
 			var action = {
 				character: character.serialize(),

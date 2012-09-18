@@ -6,9 +6,7 @@ var Entities = function () {
 	this.entities_ = [];
 	this.mappings_ = {};
 	this.uuids_ = [];
-
-	// this.onUnserializeEntity = function () {};
-	// this.onCreateEntity = function () {};
+	this.types_ = {};
 };
 
 Entities.prototype.create = function (type, uuid) {
@@ -28,8 +26,24 @@ Entities.prototype.create = function (type, uuid) {
 	this.entities_.push(entity);
 	this.mappings_[uuid] = index;
 
+	if (!this.types_.hasOwnProperty(type)) {
+		this.types_[type] = [];
+	}
+	this.types_[type].push(entity);
+
 //	this.onCreateEntity(type, entity);
 	return entity;
+};
+
+Entities.prototype.findByType = function (type) {
+	if (!this.types_.hasOwnProperty(type)) {
+		return [];
+	}
+	return this.types_[type];
+};
+
+Entities.prototype.findAll = function () {
+	return this.entities_;
 };
 
 Entities.prototype.parseType = function (uuid) {
@@ -44,6 +58,7 @@ Entities.prototype.register = function (type, factory) {
 Entities.prototype.identify = function (entity) {
 	return this.uuids_[this.entities_.indexOf(entity)];
 };
+
 
 Entities.prototype.find = function (uuid) {
 	if (!this.has(uuid)) {
@@ -84,21 +99,31 @@ Entities.prototype.serializeOnce = function (uuid) {
 Entities.prototype.unserialize = function (serial) {
 	var entity = null,
 		type = null,
-		uuid = null;
+		uuid = null,
+		is_new = false;
 
 	for (uuid in serial) {
 		if (serial.hasOwnProperty(uuid)) {
 			type = this.parseType(uuid);
 			if (!this.has(uuid)) {
 				entity = this.create(type, uuid);
+				is_new = true;
 			} else {
 				entity = this.find(uuid);
+				is_new = false;
 			}
 			entity.unserialize(serial[uuid], this);
-			// this.onUnserializeEntity(type, entity);
+			if (is_new) {
+				this.onCreateEntity(entity, type, uuid);
+			} else {
+				this.onUpdateEntity(entity, type, uuid);
+			}
 		}
 	}
 	return serial;
 };
+
+Entities.prototype.onUpdateEntity = function () {};
+Entities.prototype.onCreateEntity = function () {};
 
 if (!__BROWSER__) { module.exports = Entities; }
