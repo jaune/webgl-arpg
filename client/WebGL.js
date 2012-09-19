@@ -5,22 +5,17 @@ var WebGL = function () {
 	var self = this;
 
 	this.canvas_ = new Canvas();
-	this.canvas_.oninitialize = function (element) {
+	this.canvas_.onInitialize = function (element) {
 		self.doInitialize(element);
 	};
 
-	this.canvas_.onresize = function (width, height) {
-		self.onresize(width, height);
+	this.canvas_.onResize = function (width, height) {
+		self.onResize(width, height);
 	};
-
-	this.canvas_.onrender = function (time) {
-		self.onrender(time);
-	};
-	
-	this.oninitialize = function () {};
-	this.onresize = function () {};
-	this.onrender = function () {};
 };
+
+WebGL.prototype.onInitialize = function () {};
+WebGL.prototype.onResize = function () {};
 
 WebGL.prototype.initialize = function() {
 	this.canvas_.initialize();
@@ -36,8 +31,7 @@ WebGL.prototype.doInitialize = function (canvas) {
 		throw new Error('Unable to initialize the webgl context.');
 	}
 	gl = context;
-	this.oninitialize(canvas.width, canvas.height);
-	this.canvas_.render();
+	this.onInitialize(canvas.width, canvas.height);
 };
 
 WebGL.prototype.createShaderFromId = function (id) {

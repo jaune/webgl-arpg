@@ -1,6 +1,7 @@
 var __BROWSER__ = __BROWSER__ || false;
 
 if (!__BROWSER__) {
+	var Character = require('./Character.js');
 }
 
 var Player = function () {
@@ -28,7 +29,7 @@ Player.prototype.getCurrentOrder = function (cycle) {
 	if (l > 0) {
 		return a[l - 1][1];
 	}
-	return 'idle south';
+	return Character.ACTION_DEFAULT;
 };
 
 Player.prototype.step = function () {

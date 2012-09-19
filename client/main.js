@@ -32,75 +32,9 @@ function viewport_apply(program) {
 }
 */
 
-webgl.onrender = function (time) {
-	// console.time('render');
-	current_time = time;
-	if (last_time === null) {
-		elapsed_time =  0;
-	} else {
-		elapsed_time =  current_time - last_time;
-	}
-	last_time = current_time;
-
-	// characters.update(elapsed_time);
-	
-	gl.clear(gl.COLOR_BUFFER_BIT);
-//	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-	if (need_viewport_apply === true) {
-		gl.viewport(0, 0, viewport_width, viewport_height);
-		viewport_matrix = viewport_matrix_update();
-		area.applyViewportMatrix(viewport_matrix);
-		characters.applyViewportMatrix(viewport_matrix);
-	}
-
-	area.render();
-	characters.render();
-
-/*
-	gl.blendFunc(gl.ZERO, gl.SRC_COLOR);
-
-	fog.render(function (program) {
-		if (need_viewport_apply === true) {
-			viewport_apply(program);
-		}
-	});
-*/
-
-	need_viewport_apply = false;
-
-	// console.timeEnd('render');
-};
-
-webgl.onresize = function (width, height) {
-	viewport_width = width;
-	viewport_height = height;
-	
-	need_viewport_apply = true;
-};
-
-webgl.oninitialize = function (width, height) {
-	viewport_width = width;
-	viewport_height = height;
-	
-	gl.clearColor(0.0, 0.0, 0.0, 1.0);
-	gl.disable(gl.DEPTH_TEST);
-	
-	gl.enable(gl.BLEND);
-	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-	gl.clear(gl.COLOR_BUFFER_BIT);
-
-	need_viewport_apply = true;
-
-	area.initialize();
-	characters.initialize();
-//	fog.initialize();
-	
-	network.initialize();
 
 
-};
+
 
 /*
 network.onCreateEntity = function (type, entity) {
@@ -130,29 +64,29 @@ network.onEnter = function (player) {
 };
 
 inputs.mapping({
-	'key 40 pressed' : 'walk south',
-	'key 83 pressed' : 'walk south',
+	'key 40 pressed' : Character.ACTION_WALK_SOUTH,
+	'key 83 pressed' : Character.ACTION_WALK_SOUTH,
 
-	'key 38 pressed' : 'walk north',
-	'key 87 pressed' : 'walk north',
+	'key 38 pressed' : Character.ACTION_WALK_NORTH,
+	'key 87 pressed' : Character.ACTION_WALK_NORTH,
 
-	'key 37 pressed' : 'walk west',
-	'key 65 pressed' : 'walk west',
+	'key 37 pressed' : Character.ACTION_WALK_WEST,
+	'key 65 pressed' : Character.ACTION_WALK_WEST,
 
-	'key 39 pressed' : 'walk east',
-	'key 68 pressed' : 'walk east',
+	'key 39 pressed' : Character.ACTION_WALK_EAST,
+	'key 68 pressed' : Character.ACTION_WALK_EAST,
 
-	'key 40 released' : 'idle south',
-	'key 83 released' : 'idle south',
+	'key 40 released' : Character.ACTION_IDLE_SOUTH,
+	'key 83 released' : Character.ACTION_IDLE_SOUTH,
 
-	'key 38 released' : 'idle north',
-	'key 87 released' : 'idle north',
+	'key 38 released' : Character.ACTION_IDLE_NORTH,
+	'key 87 released' : Character.ACTION_IDLE_NORTH,
 
-	'key 37 released' : 'idle west',
-	'key 65 released' : 'idle west',
+	'key 37 released' : Character.ACTION_IDLE_WEST,
+	'key 65 released' : Character.ACTION_IDLE_WEST,
 
-	'key 39 released' : 'idle east',
-	'key 68 released' : 'idle east',
+	'key 39 released' : Character.ACTION_IDLE_EAST,
+	'key 68 released' : Character.ACTION_IDLE_EAST,
 
 	'key 32 pressed' : 'attack'
 });
@@ -160,7 +94,7 @@ inputs.mapping({
 inputs.onaction = function (action) {
 	
 	if (action === 'attack') {
-		console.debug(network);
+		console.debug(network.machine_.computeRealCycle(current_time));
 	} else {
 		network.pushOrder(action);
 	}
@@ -205,16 +139,83 @@ function image_load(uri, callback) {
 	image.src = uri;
 }
 
+
+
+webgl.onResize = function (width, height) {
+	viewport_width = width;
+	viewport_height = height;
+	
+	need_viewport_apply = true;
+};
+
+webgl.onInitialize = function (width, height) {
+	viewport_width = width;
+	viewport_height = height;
+	
+	gl.clearColor(0.0, 0.0, 0.0, 1.0);
+	gl.disable(gl.DEPTH_TEST);
+	
+	gl.enable(gl.BLEND);
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+	gl.clear(gl.COLOR_BUFFER_BIT);
+
+	need_viewport_apply = true;
+
+	area.initialize();
+	characters.initialize();
+//	fog.initialize();
+	
+	network.initialize();
+
+	requestAnimationFrame__(animate);
+};
+
+function times_update (time) {
+	current_time = time;
+	if (last_time === null) {
+		elapsed_time =  0;
+	} else {
+		elapsed_time =  current_time - last_time;
+	}
+	last_time = current_time;
+}
+
+function animate (time) {
+	requestAnimationFrame__(animate);
+
+	times_update(time);
+
+
+
+	var real_cycle = network.computeRealCycle(current_time);
+	
+	gl.clear(gl.COLOR_BUFFER_BIT);
+
+	if (need_viewport_apply === true) {
+		gl.viewport(0, 0, viewport_width, viewport_height);
+		viewport_matrix = viewport_matrix_update();
+		area.applyViewportMatrix(viewport_matrix);
+		characters.applyViewportMatrix(viewport_matrix);
+	}
+
+	area.render();
+	characters.render(real_cycle);
+
+	need_viewport_apply = false;
+}
+
+
+
 (function main () {
 	image_load('images/tileset0.png', function (tileset_image) {
 		image_load('images/characters.png', function (characters_image) {
-			image_load('images/fog0.png', function (fog_image) {
+//			image_load('images/fog0.png', function (fog_image) {
 				area = new AreaRenderer(tileset_image);
 				characters = new CharactersRenderer(characters_image);
 				// fog = new Fog(fog_image);
 				webgl.initialize();
-			});
+//			});
 		});
 	});
 })();
-

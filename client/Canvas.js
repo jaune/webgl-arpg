@@ -1,10 +1,7 @@
-var Canvas = function () {
-	
-	this.oninitialize = function () {};
-	this.onresize = function () {};
-	this.onrender = function () {};
+var Canvas = function () {};
 
-};
+Canvas.prototype.oninitialize = function () {};
+Canvas.prototype.onresize = function () {};
 
 Canvas.prototype.initialize = function () {
 	var self = this;
@@ -23,24 +20,11 @@ Canvas.prototype.initialize = function () {
 		resize_timeout = window.setTimeout(function () {
 			canvas.width = window.innerWidth;
 			canvas.height = window.innerHeight;
-			self.onresize(canvas.width, canvas.height);
+			self.onResize(canvas.width, canvas.height);
 			resize_timeout = null;
 		}, 1000);
 	});
 
-	this.oninitialize(canvas);
+	this.onInitialize(canvas);
 };
 
-Canvas.prototype.render = function () {
-	var self = this;
-	window.requestAnimationFrame__(function (time) {
-		self.onrender(time);
-		self.render();
-	});
-};
-
-window.requestAnimationFrame__ = (function(){
-	return  window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback){
-		window.setTimeout(function () { callback(+(new Date())); } , 1000 / 60);
-	};
-})();

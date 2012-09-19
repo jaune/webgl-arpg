@@ -76,7 +76,7 @@ CharactersRenderer.prototype.applyViewportMatrix = function (matrix) {
 	this.need_viewport_matrix_apply_ = true;
 };
 
-CharactersRenderer.prototype.render = function () {
+CharactersRenderer.prototype.render = function (real_cycle) {
 	var l = this.characters_.length;
 	if (l === 0) {
 		return;
@@ -90,12 +90,12 @@ CharactersRenderer.prototype.render = function () {
 		gl.uniformMatrix4fv(this.program_.getUniform('uViewportMatrix'), false, this.viewport_matrix_);
 	}
 
-	this.bindAttributes();
+	this.bindAttributes(real_cycle);
 
 	gl.drawArrays(gl.TRIANGLES, 0, l * 6);
 };
 
-CharactersRenderer.prototype.buildAttributes = function () {
+CharactersRenderer.prototype.buildAttributes = function (real_cycle) {
 	var c = this.characters_,
 		o = 32 / 2,
 		l = c.length,
@@ -104,7 +104,7 @@ CharactersRenderer.prototype.buildAttributes = function () {
 		data = new Float32Array(l * s);
 
 	for (i = 0; i < l; i++) {
-		cp = c[i].computeCurrentPosition();
+		cp = c[i].computeRealPosition(real_cycle);
 		x = (cp[0] * 32) + o;
 		y = (cp[1] * 32) + o;
 
@@ -126,9 +126,9 @@ CharactersRenderer.prototype.initializeAttributes = function () {
 	this.attributes_ = gl.createBuffer();
 };
 
-CharactersRenderer.prototype.bindAttributes = function () {
+CharactersRenderer.prototype.bindAttributes = function (real_cycle) {
 	var stride = Float32Array.BYTES_PER_ELEMENT * 4,
-		data = this.buildAttributes();
+		data = this.buildAttributes(real_cycle);
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes_);
 	gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);

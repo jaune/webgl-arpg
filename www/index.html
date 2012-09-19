@@ -8,7 +8,15 @@
 		<script type="text/javascript">
 			var __BROWSER__ = true;
 		</script>
-		<script src="/socket.io/socket.io.js"></script>
+		<script type="text/javascript">
+			window.requestAnimationFrame__ = (function(){
+				return  window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback){
+					window.setTimeout(function () { callback(+(new Date())); } , 1000 / 60);
+				};
+			})();
+		</script>
+
+		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
 
 		<script type="text/javascript" src="scripts/common/gl-matrix.js"></script>
 		

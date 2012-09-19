@@ -10,13 +10,10 @@ var Character = function () {
 	// this.position_current_ = this.position_;
 
 	this.next_action_ = null;
-
 	this.action_ = null;
-	this.duration_ = -1;
-	this.elapsed_cycle_ = 0;
+	this.duration_ = null;
+	this.cycle_ = null;
 	this.delta_ = null;
-
-	this.initializeAction(Character.ACTION_DEFAULT);
 };
 
 Character.ACTION_WALK_NORTH = 'walk north';
@@ -34,20 +31,32 @@ Character.ACTION_DEFAULT = Character.ACTION_IDLE_SOUTH;
 
 Character.prototype.unserialize = function (serial) {
 	this.position_ = serial.position;
-//	this.position_current_ = this.position_;
+	this.next_action_ = serial.next_action;
+	this.action_ = serial.action;
+	this.duration_ = serial.duration;
+	this.cycle_ = serial.cycle;
+	this.delta_ = serial.delta;
 };
 
 Character.prototype.serialize = function () {
 	return {
-		position : [this.position_[0], this.position_[1]]
+		position: [this.position_[0], this.position_[1]],
+		next_action: this.next_action_,
+		action: this.action_,
+		duration: this.duration_,
+		cycle: this.cycle_,
+		delta: this.delta_
 	};
 };
 
 
-Character.prototype.computeCurrentPosition = function () {
+Character.prototype.computeRealPosition = function (real_cycle) {
 	var position = vec2.create();
 	if (this.duration_ !== -1) {
-		vec2.scale(this.delta_, this.elapsed_cycle_ / this.duration_, position);
+		// console.debug((real_cycle - this.cycle_) / this.duration_);
+
+
+		vec2.scale(this.delta_, (real_cycle - this.cycle_)  / this.duration_, position);
 	}
 	vec2.add(this.position_, position);
 	vec2.scale(position, 0.001);
@@ -59,10 +68,12 @@ Character.prototype.setNextAction = function (action) {
 };
 
 
-Character.prototype.initializeAction = function (action) {
-	this.action_ = action;
-	this.elapsed_cycle_ = 0;
-	switch (this.action_) {
+Character.prototype.initializeAction = function (action, current_cycle) {
+	this.releaseAction();
+
+	var a = action || this.ACTION_DEFAULT;
+	
+	switch (a) {
 		case Character.ACTION_WALK_SOUTH:
 			this.duration_ = 10;
 			this.delta_ = [0, 1000];
@@ -87,6 +98,8 @@ Character.prototype.initializeAction = function (action) {
 			this.delta_ = null;
 		break;
 	}
+	this.cycle_ = current_cycle;
+	this.action_ = a;
 };
 
 Character.prototype.releaseAction = function () {
@@ -101,27 +114,26 @@ Character.prototype.releaseAction = function () {
 			];
 		break;
 	}
+	this.action_ = null;
+	this.duration_ = null;
+	this.cycle_ = null;
+	this.delta_ = null;
 };
 
-Character.prototype.updateAction = function () {
-	if ((this.duration_ !== -1) && (this.elapsed_cycle_ >= this.duration_)) {
-		this.releaseAction();
-		if (this.next_action_ !== null) {
-			this.initializeAction(this.next_action_);
-		} else {
-			this.initializeAction(this.ACTION_DEFAULT);
-		}
+Character.prototype.step = function (current_cycle) {
+	if (this.action_ === null) {
+		this.initializeAction(this.next_action_, current_cycle);
 		return;
 	}
-	this.elapsed_cycle_++;
-};
-
-Character.prototype.step = function () {
-	if ((this.duration_ === -1) && (this.next_action_ !== null)) {
-		this.initializeAction(this.next_action_);
-	} else {
-		this.updateAction();
+	if ((this.duration_ === -1)) {
+		this.initializeAction(this.next_action_, current_cycle);
+		return;
 	}
+	if ((current_cycle - this.cycle_) >= this.duration_) {
+		this.initializeAction(this.next_action_, current_cycle);
+		return;
+	}
+
 };
 
 if (!__BROWSER__) {

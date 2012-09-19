@@ -79,7 +79,7 @@ function onConnection (socket) {
 
 			
 
-//			socket.broadcast.emit('other do', action);
+			socket.broadcast.emit('order', player_uuid, order);
 		});
 
 //	});
@@ -95,7 +95,7 @@ setInterval(function () {
 
 setInterval(function () {
 	machine.step();
-}, 50);
+}, Machine.CYCLE_DURATION);
 
 
 server.listen(80);
