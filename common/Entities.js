@@ -15,10 +15,7 @@ Entities.prototype.create = function (type, uuid) {
 	}
 
 	var index = this.entities_.length;
-	uuid = uuid || [
-		(index + 1).toString(36),
-		type
-	].join('-');
+	uuid = uuid || (index + 1).toString(36) + '-' + type;
 
 	var entity = this.factories_[type].create(uuid);
 
@@ -47,7 +44,11 @@ Entities.prototype.findAll = function () {
 };
 
 Entities.prototype.parseType = function (uuid) {
-	return uuid.split('-')[1];
+	for (var type in this.factories_) {
+		if (uuid.indexOf(type) !== -1) {
+			return type;
+		}
+	}
 };
 
 Entities.prototype.register = function (type, factory) {
@@ -87,12 +88,6 @@ Entities.prototype.serializeAll = function () {
 	for (i = 0; i < l; ++i) {
 		serial[u[i]] = e[i].serialize(this);
 	}
-	return serial;
-};
-
-Entities.prototype.serializeOnce = function (uuid) {
-	var serial = {};
-	serial[uuid] = this.find(uuid).serialize(this);
 	return serial;
 };
 

@@ -10,7 +10,6 @@ var	current_time = 0,
 	characters = null,
 	fog = null,
 	inputs = new Inputs(),
-	player_character = null,
 	network = new Network();
 
 function viewport_matrix_update() {
@@ -21,7 +20,7 @@ function viewport_matrix_update() {
 		-1, 1, -1, 1
 	]);
 	mat4.translate(matrix, [viewport_offset_x, viewport_offset_y, 0.0]);
-	mat4.scale(matrix, [0.5, 0.5, 0]);
+//	mat4.scale(matrix, [0.5, 0.5, 0]);
 	return matrix;
 }
 /*
@@ -58,8 +57,6 @@ network.onUpdateEntity = function (entity, type, uuid) {
 };
 
 network.onEnter = function (player) {
-	player_character = player.getCharacter();
-//	characters.append(player_character);
 	inputs.initialize();
 };
 
@@ -92,43 +89,11 @@ inputs.mapping({
 });
 
 inputs.onaction = function (action) {
-	
 	if (action === 'attack') {
-		console.debug(network.machine_.computeRealCycle(current_time));
+//		console.debug(network.machine_.computeRealCycle(current_time));
 	} else {
 		network.pushOrder(action);
 	}
-	/*
-	switch (action) {
-		case 'walk south':
-			player_character.next_action_ = {
-				delta: vec2.create([0.0, 1.0]),
-				duration: 300
-			};
-		break;
-		case 'walk north':
-			player_character.next_action_ = {
-				delta: vec2.create([0.0, -1.0]),
-				duration: 300
-			};
-		break;
-		case 'walk east':
-			player_character.next_action_ = {
-				delta: vec2.create([1.0, 0.0]),
-				duration: 300
-			};
-		break;
-		case 'walk west':
-			player_character.next_action_ = {
-				delta: vec2.create([-1.0, 0.0]),
-				duration: 300
-			};
-		break;
-		default:
-			player_character.next_action_ = null;
-
-	}
-	*/
 };
 
 function image_load(uri, callback) {
@@ -182,11 +147,9 @@ function times_update (time) {
 }
 
 function animate (time) {
-	requestAnimationFrame__(animate);
+	
 
 	times_update(time);
-
-
 
 	var real_cycle = network.computeRealCycle(current_time);
 	
@@ -203,6 +166,8 @@ function animate (time) {
 	characters.render(real_cycle);
 
 	need_viewport_apply = false;
+
+	requestAnimationFrame__(animate);
 }
 
 

@@ -9,12 +9,13 @@ var AreaRenderer = function (tileset_image) {
 	this.tileset_texture_ = new Texture();
 	this.tileset_image_ = tileset_image;
 
-	this.attributes_ = null;
-
 	this.program_ = null;
 
 	this.viewport_matrix_ = null;
 	this.need_viewport_matrix_apply_ = false;
+
+
+	this.va_buffer_ = new VertexAttributeBuffer(VertexAttributeBuffer.USAGE_STATIC_DRAW);
 };
 
 
@@ -24,7 +25,6 @@ AreaRenderer.prototype.initialize = function () {
 	this.program_.use();
 
 	this.initilizeTextureBuffer();
-	this.initilizeAttributes();
 	
 	this.program_.initializeUniforms([
 		'uTilesetSampler',
@@ -39,6 +39,24 @@ AreaRenderer.prototype.initialize = function () {
 		'aVertexPosition',
 		'aTextureCoord'
 	]);
+
+	// this.initilizeAttributes();
+
+	this.va_buffer_.appendAttribute(this.program_.getAttribute('aVertexPosition'), 2);
+	this.va_buffer_.appendAttribute(this.program_.getAttribute('aTextureCoord'), 2);
+	this.va_buffer_.allocate(4);
+
+	var w = this.area_size_,
+		h = this.area_size_;
+
+	this.va_buffer_.write(
+		w,  h, 1.0, 1.0,
+		0.0, h, 0.0, 1.0,
+		w, 0.0, 1.0, 0.0,
+		0.0,0.0, 0.0, 0.0
+	);
+
+
 
 	this.tileset_texture_.initializeFromImage(
 		this.program_.getUniform('uTilesetSampler'),
@@ -73,7 +91,8 @@ AreaRenderer.prototype.render = function () {
 		gl.uniformMatrix4fv(this.program_.getUniform('uViewportMatrix'), false, this.viewport_matrix_);
 	}
 
-	this.bindAttributes();
+	// this.bindAttributes();
+	this.va_buffer_.bind(gl);
 
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 };
@@ -97,29 +116,3 @@ AreaRenderer.prototype.initilizeTextureBuffer = function () {
 
 /* ---- */
 
-
-AreaRenderer.prototype.initilizeAttributes = function () {
-	var w = this.area_size_,
-		h = this.area_size_,
-		data = [
-			w,  h, 1.0, 1.0,
-			0.0, h, 0.0, 1.0,
-			w, 0.0, 1.0, 0.0,
-			0.0,0.0, 0.0, 0.0
-		];
-
-
-
-	var buffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
-	this.attributes_ = buffer;
-};
-
-AreaRenderer.prototype.bindAttributes = function () {
-	var stride = Float32Array.BYTES_PER_ELEMENT * 4;
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes_);
-	gl.vertexAttribPointer(this.program_.getAttribute('aVertexPosition'), 2, gl.FLOAT, false, stride, 0);
-	gl.vertexAttribPointer(this.program_.getAttribute('aTextureCoord'), 2, gl.FLOAT, false, stride, 2 * Float32Array.BYTES_PER_ELEMENT);
-};

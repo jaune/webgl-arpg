@@ -19,11 +19,9 @@ var CharactersRenderer = function (characters_image) {
 	this.viewport_matrix_ = null;
 	this.need_viewport_matrix_apply_ = false;
 
-	this.attributes_ = null;
+	this.va_buffer_ = new VertexAttributeBuffer(VertexAttributeBuffer.USAGE_STREAM_DRAW);
+	this.va_buffer_margin_ = 8;
 };
-
-
-
 
 
 CharactersRenderer.prototype.contains = function (character) {
@@ -57,8 +55,10 @@ CharactersRenderer.prototype.initialize = function () {
 
 	this.texture_.initializeFromImage(this.program_.getUniform('uCharacterSampler'), this.image_);
 
+	this.va_buffer_.appendAttribute(this.program_.getAttribute('aPosition'), 2);
+	this.va_buffer_.appendAttribute(this.program_.getAttribute('aCoordinates'), 2);
 
-	this.initializeAttributes();
+
 };
 
 /*
@@ -90,50 +90,45 @@ CharactersRenderer.prototype.render = function (real_cycle) {
 		gl.uniformMatrix4fv(this.program_.getUniform('uViewportMatrix'), false, this.viewport_matrix_);
 	}
 
-	this.bindAttributes(real_cycle);
+	this.updateBuffer(real_cycle);
+
+	this.va_buffer_.bind(gl);
 
 	gl.drawArrays(gl.TRIANGLES, 0, l * 6);
 };
 
-CharactersRenderer.prototype.buildAttributes = function (real_cycle) {
+CharactersRenderer.prototype.updateBuffer = function (real_cycle) {
 	var c = this.characters_,
-		o = 32 / 2,
+		o = Character.FRAME_SIZE / 2,
 		l = c.length,
-		s = 4 * 6,
-		t = 32.0/512.0,
-		data = new Float32Array(l * s);
-
-	for (i = 0; i < l; i++) {
-		cp = c[i].computeRealPosition(real_cycle);
-		x = (cp[0] * 32) + o;
-		y = (cp[1] * 32) + o;
-
-		data.set([
-			x + o, y + o, t, t,
-			x - o, y + o, 0.0, t,
-			x - o, y - o, 0.0, 0.0,
-
-			x - o, y - o, 0.0, 0.0,
-			x + o, y - o, t, 0.0,
-			x + o, y + o, t, t
-		], i * s);
+		tr = Character.FRAME_SIZE / Character.FRAMES_SIZE,
+		s = l * 6;
+	if (this.va_buffer_.getCapacity() < s) {
+		this.va_buffer_.allocate(s + (this.va_buffer_margin_ * 6));
 	}
+	this.va_buffer_.rewind();
+	for (i = 0; i < l; i++) {
 
-	return data;
-};
+		cp = c[i].computeRealPosition(real_cycle);
+		x0 = (cp[0] * (Character.FRAME_SIZE * 0.001));
+		x1 = x0 + o + o;
+		y0 = (cp[1] * (Character.FRAME_SIZE * 0.001));
+		y1 = y0 + o + o;
 
-CharactersRenderer.prototype.initializeAttributes = function () {
-	this.attributes_ = gl.createBuffer();
-};
-
-CharactersRenderer.prototype.bindAttributes = function (real_cycle) {
-	var stride = Float32Array.BYTES_PER_ELEMENT * 4,
-		data = this.buildAttributes(real_cycle);
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes_);
-	gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
-
-	gl.vertexAttribPointer(this.program_.getAttribute('aPosition'), 2, gl.FLOAT, false, stride, 0);
-	gl.vertexAttribPointer(this.program_.getAttribute('aCoordinates'), 2, gl.FLOAT, false, stride, 2 * Float32Array.BYTES_PER_ELEMENT);
+		ti = c[i].computeFrameIndex(real_cycle);
+		tx0 = ((ti & 0xF0) >> 4) * tr;
+		tx1 = tx0 + tr;
+		ty0 = (ti & 0x0F) * tr;
+		ty1 = ty0 + tr;
+		
+		this.va_buffer_.write(
+			x1, y1, tx1, ty1,
+			x0, y1, tx0, ty1,
+			x0, y0, tx0, ty0,
+			x0, y0, tx0, ty0,
+			x1, y0, tx1, ty0,
+			x1, y1, tx1, ty1
+		);
+	}
 };
 

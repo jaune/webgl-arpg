@@ -46,6 +46,7 @@ Network.prototype.initialize = function () {
 	socket.on('order', function (uuid, order) {
 		self.machine_.pushOrder(uuid, order);
 	});
+
 };
 
 Network.prototype.pushOrder = function (order) {

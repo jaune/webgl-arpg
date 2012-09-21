@@ -5,13 +5,8 @@ var WebGL = function () {
 	var self = this;
 
 	this.canvas_ = new Canvas();
-	this.canvas_.onInitialize = function (element) {
-		self.doInitialize(element);
-	};
-
-	this.canvas_.onResize = function (width, height) {
-		self.onResize(width, height);
-	};
+	this.canvas_.onInitialize = function (element) { self.doInitialize(element); };
+	this.canvas_.onResize = function (width, height) { self.onResize(width, height); };
 };
 
 WebGL.prototype.onInitialize = function () {};
