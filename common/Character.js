@@ -38,6 +38,8 @@ Character.ACTION_WALK_WEST = 0x11;
 Character.ACTION_WALK_EAST = 0x12;
 Character.ACTION_WALK_NORTH = 0x13;
 
+Character.ACTION_IDLE_MASK = 0x0F;
+
 Character.FRAME_SIZE = 32;
 Character.FRAME_INDEX_LIMIT = 256;
 Character.FRAMES_SIZE = 512;
@@ -103,7 +105,30 @@ Character.prototype.setNextAction = function (action) {
 };
 
 
-Character.prototype.nextAction = function (current_cycle) {
+
+
+Character.prototype.step = function (world) {
+	var current_cycle = world.getCurrentCycle();
+	
+	if ((current_cycle - this.cycle_) < this.duration_ ||
+		((this.duration_ === -1) && (this.next_action_ == this.action_))) {
+		return;
+	}
+
+	this.commitAction();
+
+	this.cycle_ = current_cycle;
+
+	this.applyAction(this.next_action_);
+
+	if (this.delta_length_ > 0) {
+		if (!world.validateMouvement(this.position_, this.final_position_)) {
+			this.applyAction(this.action_ & Character.ACTION_IDLE_MASK);
+		}
+	}
+};
+
+Character.prototype.commitAction = function () {
 	switch (this.action_) {
 		case Character.ACTION_WALK_SOUTH:
 		case Character.ACTION_WALK_NORTH:
@@ -112,8 +137,10 @@ Character.prototype.nextAction = function (current_cycle) {
 			vec2.add(this.delta_, this.position_);
 		break;
 	}
+};
 
-	this.action_ = this.next_action_;
+Character.prototype.applyAction = function (action) {
+	this.action_ = action;
 	switch (this.action_) {
 		case Character.ACTION_WALK_SOUTH:
 			this.duration_ = 10;
@@ -146,16 +173,8 @@ Character.prototype.nextAction = function (current_cycle) {
 	}
 	this.delta_length_ = vec2.length(this.delta_);
 	vec2.add(this.position_, this.delta_, this.final_position_);
-	this.cycle_ = current_cycle;
 };
 
-Character.prototype.step = function (current_cycle) {
-	if ((current_cycle - this.cycle_) < this.duration_ ||
-		((this.duration_ === -1) && (this.next_action_ == this.action_))) {
-		return;
-	}
-	this.nextAction(current_cycle);
-};
 
 if (!__BROWSER__) {
 	module.exports = Character;

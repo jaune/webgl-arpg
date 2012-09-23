@@ -15,14 +15,16 @@ var CharactersRenderer = function (characters_image) {
 		});
 	}
 */
-
+/*
 	this.viewport_matrix_ = null;
 	this.need_viewport_matrix_apply_ = false;
+*/
 
 	this.va_buffer_ = new VertexAttributeBuffer(VertexAttributeBuffer.USAGE_STREAM_DRAW);
 	this.va_buffer_margin_ = 8;
 };
 
+CharactersRenderer.prototype = Object.create(new Renderer());
 
 CharactersRenderer.prototype.contains = function (character) {
 	return this.characters_.indexOf(character) > 0;
@@ -70,12 +72,12 @@ CharactersRenderer.prototype.update = function (elapsed_time) {
 	}
 };
 */
-
+/*
 CharactersRenderer.prototype.applyViewportMatrix = function (matrix) {
 	this.viewport_matrix_ = matrix;
 	this.need_viewport_matrix_apply_ = true;
 };
-
+*/
 CharactersRenderer.prototype.render = function (real_cycle) {
 	var l = this.characters_.length;
 	if (l === 0) {

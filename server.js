@@ -7,7 +7,7 @@ var modules = {
 
 
 
-var Machine = require('./common/Machine.js');
+var World = require('./common/World.js');
 
 
 var express_static = modules.express['static'];
@@ -15,14 +15,13 @@ var express_static = modules.express['static'];
 var app = modules.express(),
 	server = modules.http.createServer(app),
 	io = modules.socket_io.listen(server),
-	machine = new Machine();
+	world = new World();
 
 io.set('log level', 2);
 
 app.use(express_static('www'));
 app.use('/scripts/client', express_static('./client'));
 app.use('/scripts/common', express_static('./common'));
-
 
 function onConnection (socket) {
 
@@ -53,15 +52,15 @@ function onConnection (socket) {
 		});
 */
 		socket.on('enter', function () {
-			player_uuid = machine.enter();
-			socket.emit('enter', player_uuid, machine.serialize());
+			player_uuid = world.enter();
+			socket.emit('enter', player_uuid, world.serialize());
 		});
 
 		socket.on('order', function (order) {
 			if (!player_uuid) {
 				return;
 			}
-			machine.pushOrder(player_uuid, order);
+			world.pushOrder(player_uuid, order);
 			/*
 			var a = actions;
 			for (i = 0, l = a.length; i < l; i++) {
@@ -90,12 +89,12 @@ io.sockets.on('connection', onConnection);
 
 
 setInterval(function () {
-	io.sockets.emit('machine', machine.serialize());
+	io.sockets.emit('world', world.serialize());
 }, 1000);
 
 setInterval(function () {
-	machine.step();
-}, Machine.CYCLE_DURATION);
+	world.step();
+}, World.CYCLE_DURATION);
 
 
 server.listen(80);

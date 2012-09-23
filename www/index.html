@@ -21,13 +21,17 @@
 		<script type="text/javascript" src="scripts/common/gl-matrix.js"></script>
 		
 		<script type="text/javascript" src="scripts/common/Character.js"></script>
-		<script type="text/javascript" src="scripts/common/CharacterFactory.js"></script>
-
 		<script type="text/javascript" src="scripts/common/Player.js"></script>
-		<script type="text/javascript" src="scripts/common/PlayerFactory.js"></script>
+
+
+		
+		<script type="text/javascript" src="scripts/common/Area.js"></script>
 
 		<script type="text/javascript" src="scripts/common/Entities.js"></script>
-		<script type="text/javascript" src="scripts/common/Machine.js"></script>
+		<script type="text/javascript" src="scripts/common/Characters.js"></script>
+		<script type="text/javascript" src="scripts/common/Players.js"></script>
+
+		<script type="text/javascript" src="scripts/common/World.js"></script>
 
 		<script type="text/javascript" src="scripts/client/Network.js"></script>
 		<script type="text/javascript" src="scripts/client/Inputs.js"></script>
@@ -39,8 +43,12 @@
 		<script type="text/javascript" src="scripts/client/WebGL.js"></script>
 		<script type="text/javascript" src="scripts/client/Texture.js"></script>
 
+		<script type="text/javascript" src="scripts/client/Renderer.js"></script>
+		<script type="text/javascript" src="scripts/client/Renderers.js"></script>
 		<script type="text/javascript" src="scripts/client/AreaRenderer.js"></script>
 		<script type="text/javascript" src="scripts/client/CharactersRenderer.js"></script>
+
+
 
 
 		<script id="area-fs" type="x-shader/x-fragment">
@@ -122,7 +130,13 @@
 			}
 		</script>
 
+		<!-- ***************************************** -->
+
+		
+
 <!-- ***************************************** 
+
+
 
 		<script type="text/javascript" src="scripts/Fog.js"></script>
 		<script id="fog-fs" type="x-shader/x-fragment">

@@ -1,3 +1,5 @@
+(function () {
+
 var	current_time = 0,
 	elapsed_time = 0,
 	last_time = null,
@@ -9,8 +11,10 @@ var	current_time = 0,
 	area = null,
 	characters = null,
 	fog = null,
+	renderers = new Renderers(),
+	world = new World(),
 	inputs = new Inputs(),
-	network = new Network();
+	network = new Network(world);
 
 function viewport_matrix_update() {
 	var matrix = mat4.create([
@@ -31,10 +35,6 @@ function viewport_apply(program) {
 }
 */
 
-
-
-
-
 /*
 network.onCreateEntity = function (type, entity) {
 	switch (type) {
@@ -46,15 +46,16 @@ network.onCreateEntity = function (type, entity) {
 		default:
 	}
 };
+
+network.world_.characters_.onSet = function (entity, uuid) {
+	characters.append(entity);
+};
 */
-network.onCreateEntity = function (entity, type, uuid) {
-	if (type == Machine.ENTITY_CHARACTER) {
-		characters.append(entity);
-	}
+
+world.onCharacterSet = function (entity, uuid) {
+	characters.append(entity);
 };
 
-network.onUpdateEntity = function (entity, type, uuid) {
-};
 
 network.onEnter = function (player) {
 	inputs.initialize();
@@ -127,9 +128,11 @@ webgl.onInitialize = function (width, height) {
 
 	need_viewport_apply = true;
 
-	area.initialize();
-	characters.initialize();
+//	area.initialize();
+//	characters.initialize();
 //	fog.initialize();
+
+	renderers.initialize();
 	
 	network.initialize();
 
@@ -147,8 +150,6 @@ function times_update (time) {
 }
 
 function animate (time) {
-	
-
 	times_update(time);
 
 	var real_cycle = network.computeRealCycle(current_time);
@@ -158,29 +159,38 @@ function animate (time) {
 	if (need_viewport_apply === true) {
 		gl.viewport(0, 0, viewport_width, viewport_height);
 		viewport_matrix = viewport_matrix_update();
-		area.applyViewportMatrix(viewport_matrix);
-		characters.applyViewportMatrix(viewport_matrix);
+		renderers.applyViewportMatrix(viewport_matrix);
 	}
-
-	area.render();
-	characters.render(real_cycle);
-
+	renderers.render(real_cycle);
 	need_viewport_apply = false;
-
 	requestAnimationFrame__(animate);
 }
 
 
 
 (function main () {
+
+	world.getArea().loadDefault();
+
 	image_load('images/tileset0.png', function (tileset_image) {
 		image_load('images/characters.png', function (characters_image) {
 //			image_load('images/fog0.png', function (fog_image) {
-				area = new AreaRenderer(tileset_image);
+				
+
+
+				var area = new AreaRenderer(world.getArea(), tileset_image);
 				characters = new CharactersRenderer(characters_image);
+
+				renderers.append(area);
+				renderers.append(characters);
+
 				// fog = new Fog(fog_image);
 				webgl.initialize();
 //			});
 		});
 	});
+})();
+
+
+
 })();

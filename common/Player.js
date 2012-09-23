@@ -22,14 +22,14 @@ Player.prototype.getCharacter = function () {
 	return this.character_;
 };
 
-Player.prototype.unserialize = function (serial, entities) {
-	this.character_ = entities.find(serial.character);
+Player.prototype.unserialize = function (serial, machine) {
+	this.character_ = machine.getCharacter(serial.character);
 	this.order_ = serial.order;
 };
 
-Player.prototype.serialize = function (entities) {
+Player.prototype.serialize = function (machine) {
 	return {
-		character: entities.identify(this.character_),
+		character: machine.identifyCharacter(this.character_),
 		order: this.order_
 	};
 };
