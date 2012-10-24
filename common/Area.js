@@ -2,7 +2,7 @@ var __BROWSER__ = __BROWSER__ || false;
 
 if (!__BROWSER__) {
 	require('./gl-matrix.js');
-	var AreaCollisionLayer = require('./AreaCollisionLayer.js');
+	// var AreaCollisionLayer = require('./AreaCollisionLayer.js');
 }
 
 var Area = function () {
